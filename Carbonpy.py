@@ -3,6 +3,8 @@
 # - single bond
 # = double bond
 # ~ triple bond
+# TODO: Should be able to identify multiple bonds in a compound, identify branched chains, and
+#  check if given compound is valid.
 
 
 class Namer(object):  # IUPAC Names for now only
@@ -64,7 +66,7 @@ class Namer(object):  # IUPAC Names for now only
 
         try:
             lowest = self.lowest_position('C')  # If triple bond in between compound
-            lowest = self.lowest_position('CH')  # If triple bond in ends or ethyne
+            lowest = self.lowest_position('CH')  # If triple bond at ends or ethyne
         except ValueError:
             pass
 
@@ -73,10 +75,7 @@ class Namer(object):  # IUPAC Names for now only
     def lowest_position(self, element):
         lowest = 1
         front_search = self.processing.index(element) + 1  # Searches for element from the front
-
-        self.processing = list(reversed(self.processing))
-        back_search = self.processing.index(element) + 1  # Searches for element from the back
-        self.processing = list(reversed(self.processing))
+        back_search = list(reversed(self.processing)).index(element) + 1  # Searches for element from the back
 
         if back_search < front_search:
             lowest = back_search
@@ -86,9 +85,10 @@ class Namer(object):  # IUPAC Names for now only
         return lowest
 
 
-prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "hept", 8: "oct"}
+prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "hept", 8: "oct", 9: "non", 10: "dec",
+            11: "undec", 12: "dodec"}
 
 
-compound = Namer('CH2=CH-CH=CH2')
+compound = Namer('CH2-CH2-CH=CH2')
 
 print(compound.analyser())
