@@ -19,4 +19,10 @@ Double bond:- =
 Triple bond:- ~  
 Branches:- -([compound](more branches...))([another branch from same carbon])- and so on  
 
-Will support naming with functional groups in the future soon.
+Example- 2-Methylpropane would be expressed as:
+```
+a = Namer('CH3-CH(CH3)-CH3').analyser()
+>>> 2-Methylpropane
+```
+
+Will support naming with functional groups in the future.
