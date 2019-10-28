@@ -3,8 +3,8 @@
 # - single bond
 # = double bond
 # ~ triple bond
-# TODO: Should be able to identify multiple bonds in a compound, identify branched chains, and 
-#  somehow represent thecompound in the same way you would draw it
+# TODO: Should be able to identify multiple bonds in a compound, identify branched chains, and
+#  somehow represent the compound in the same way you would draw it
 
 
 class Namer(object):  # IUPAC Names for now only
@@ -15,62 +15,58 @@ class Namer(object):  # IUPAC Names for now only
         self.hydrogens = 0
         self.bond = ""  # Name of bond
         # self.final = ""  # Name of final compound
-        self.processing = []  # List for analysing given compound
+        self.processing = structure
 
     def analyser(self):
         compound_name = ""
+        many_bonds = ""
 
         # Counts number of hydrogens and carbons in compound-
         self.carbons = self.atom_counter('C')
         self.hydrogens = self.atom_counter('H')
 
         # If compound valencies not satisfied-
-        self.compound_check()
+        self.valency_checker()
 
         # Processing and deciding name(s) of the compound-
-        if '~' in self.structure:  # For alkynes
-            self.bond = "yne"
-            triple_bonds = self.structure.count('~')
-            self.processing = self.structure.split('~')
-            bond_type = self.alkynes_namer()
-            compound_name += f"-{bond_type}"  # Suffix and position is decided
+        if '~' in self.structure or '=' in self.structure:  # For alkynes and alkenes
+            # triple_bonds = self.structure.count('~')
+            # double_bonds = self.structure.count('=')
+            bond_type = self.atom_stripper()
+            for key, value in multipl_prefixes.items():
+                if value in bond_type:
+                    many_bonds = "a"  # This is the 'a' in a compound like butadiene
+                    break
+            compound_name += f"{many_bonds}-{bond_type}"  # Suffix and position is decided
 
-        if '=' in self.structure:  # For alkenes
-            double_bonds = self.structure.count('=')
-            self.processing = self.structure.split('=')
-            bond_type = self.alkenes_namer()
-            self.bond = "ene"
-            compound_name += f"-{bond_type}"  # Suffix and position is decided
-
-        if '~' not in self.structure and '=' not in self.structure:  # For alkanes
+        else:  # For alkanes
             self.bond = "ane"
             compound_name += self.bond
 
         return f"{prefixes[self.carbons].capitalize()}{compound_name}"  # returns final name
 
-    def compound_check(self):
-        """Checks if valencies of carbon are satisfied the same way you would do in real life, by counting no of
-        hydrogens and bonds before and after the carbon."""
+    def valency_checker(self):
+        """Checks if valencies of carbon are satisfied the same way you would do in real life, by counting no. of
+        atoms and bonds before and after the carbon."""
 
         values = {'H': 1, '-': 1, '=': 2, '~': 3}
-        # 'CH3-CH=C=CH2'
-        # 'CH~CH'
+        # use these as examples to understand code below 'CH3-CH=C=CH2', 'CH~CH':
         for index, atom in enumerate(self.structure):
             if atom == 'C':
                 valency = 0  # Valency of each carbon before calculating
                 try:
-                    if self.structure[index + 2].isdigit():  # If hydrogens after carbon
-                        valency += int(self.structure[index + 2])  # Adds those hydrogens
+                    if self.structure[index + 2].isdigit():  # If atoms after carbon
+                        valency += int(self.structure[index + 2])  # Adds those atoms
                         valency += values[self.structure[index + 3]]  # And the bond (if it isn't terminal carbon)
 
                     elif self.structure[index + 2] in values.keys():  # If single H / bonds present
                         valency += values[self.structure[index + 2]]  # Add that bond value
-                        valency += values[self.structure[index + 1]]  # Add that hydrogen
+                        valency += values[self.structure[index + 1]]  # Add that atom
                     else:
-                        valency += values[self.structure[index + 1]]  # Add either hydrogen or bond value
+                        valency += values[self.structure[index + 1]]  # Add either atom or bond value
 
                 except (IndexError, KeyError):
-                    if self.structure[-1] == 'H':  # If last carbon has hydrogen
+                    if self.structure[-1] == 'H':  # If last carbon has atom
                         valency += 1  # Add that
 
                 finally:
@@ -81,18 +77,9 @@ class Namer(object):  # IUPAC Names for now only
                     if valency != 4:  # If it still isn't four!!!
                         raise ValencyError("Check valencies of your compound!")
 
-        # This system wouldn't work if multiple different type of bonds are present-
-        # if '-' in self.structure and 2 * self.carbons + 2 == self.hydrogens:  # If in the form CnH(2n+2): Alkanes
-        #     return True
-        # elif '=' in self.structure and 2 * self.carbons == self.hydrogens:  # If in the form CnH2n: Alkenes
-        #     return True
-        # elif '~' in self.structure and 2 * self.carbons - 2 == self.hydrogens:  # If in the form CnH(2n-2): Alkynes
-        #     return True
-        # else:
-        #     return False
-
     def atom_counter(self, element):
         count = 0
+        # TODO: Use count() instead of this bs method?!
         for index, atom in enumerate(self.structure):
             try:
                 subscript = self.structure[index + 1]
@@ -109,47 +96,78 @@ class Namer(object):  # IUPAC Names for now only
 
         return count
 
-    def alkenes_namer(self):
-        lowest = 1
-        # print(self.processing)
-        for index, atom in enumerate(self.processing):
-            self.processing[index] = atom.split('-')  # Splits the compound completely (only single bonds for now)
-        self.processing = [j for i in self.processing for j in i]  # Unpacks the list inside list
+    def atom_stripper(self):
+        lowest_db = 1  # db- double bond
+        lowest_tb = 1  # tb- triple bond
+        self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
 
-        lowest = self.lowest_position('CH2')
+        # TODO: Move all of this outside the if conditions and test.
+        if '=' in self.processing and '~' in self.processing:
+            lowest_db = self.lowest_position('=')
+            lowest_tb = self.lowest_position('~')
+            lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})  # Converts to str and removes ()
+            lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
+            db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
+            tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
+            return f"{lowest_db}{db_prefix}-en-{lowest_tb}{tb_prefix}-yne"
 
-        return f"{lowest}-ene"
+        elif '~' in self.processing:
+            lowest_tb = self.lowest_position('~')
+            lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
+            return f"{lowest_tb}-yne"
 
-    def alkynes_namer(self):  # Only works if single triple bond is present
-        lowest = 1
-        for index, atom in enumerate(self.processing):
-            self.processing[index] = atom.split('-')  # Splits the compound completely (only single bonds for now)
-        self.processing = [j for i in self.processing for j in i]  # Unpacks the list inside list
-        # print(self.processing)
-
-        lowest = self.lowest_position('C')  # If triple bond in between compound
-        lowest = self.lowest_position('CH')  # If triple bond at ends or ethyne
-
-        return f"{lowest}-yne"
+        elif '=' in self.processing:
+            lowest_db = self.lowest_position('=')
+            lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})
+            return f"{lowest_db}-{multipl_prefixes[len(lowest_db.replace(',', ''))]}ene"  # Return with di,tri,etc
+        else:
+            return f"ane"  # Alkane
 
     def lowest_position(self, element):
-        lowest = 1
-        try:
-            front_search = self.processing.index(element) + 1  # Searches for element from the front
-            back_search = list(reversed(self.processing)).index(element) + 1  # Searches for element from the back
-        except ValueError:
-            pass
-        else:
-            if back_search < front_search:
-                lowest = back_search
-            else:
-                lowest = front_search
+        """First point of difference rule used"""
+        lowest_front = ()
+        lowest_back = ()
 
-        return lowest
+        # Adds all occurrences from front
+        for index, string in enumerate(self.processing):
+            if string == element:
+                lowest_front += (int(index)+1,)
+
+        # Adds all occurrences from back
+        for index, string in enumerate(''.join(reversed(self.processing))):
+            if string == element:
+                lowest_back += (int(index)+1,)
+
+        assert(len(lowest_front) == len(lowest_back))
+        for index, value in enumerate(lowest_front):
+            if value < lowest_back[index]:  # First point of difference
+                return lowest_front
+            elif lowest_back[index] < value:
+                return lowest_back
+            
+        if len(lowest_front) == 0:
+            return None
+        else:
+            print(lowest_back)
+            return lowest_back  # Can also return front(if compound is symmetrical)
+
+        # This method used to get only first index and can't be used if many bonds are present
+        # index = self.processing.index(element)
+        # rev_index = ''.join(reversed(self.processing))
+        #
+        # front_search = index + 1  # Searches for element from the front
+        # back_search = rev_index.index(element) + 1  # Searches for element from the back
+        #
+        # if back_search < front_search:
+        #     lowest = back_search
+        # else:
+        #     lowest = front_search
+        #
+        # return lowest
 
     def show_structure(self):  # If user wants to see structure
         symbol = '\u2261'  # The triple bond symbol ≡
-        return f"The compound you entered is: {self.structure.replace('~', symbol)}"
+        return f"{self.structure.replace('~', symbol)}"
 
 
 class ValencyError(Exception):
@@ -160,11 +178,19 @@ prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "h
             11: "undec", 12: "dodec", 13: "tridec", 14: "tetradec", 15: "pentadec", 16: "hexadec", 17: "heptadec",
             18: "octadec", 19: "nonadec", 20: "icos"}
 
+precedence = {"=": 1, "~": 1}
 
-# compound1 = Namer('CH3-CH=C=CH2')
-# compound2 = Namer('CH~CH')
-compound3 = Namer('CH3-C~C-CH=CH2')
+multipl_prefixes = {1: "", 2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
 
-# print(compound1.analyser())
-# print(compound2.analyser())
-print(compound3.analyser())
+
+compound1 = Namer('CH3-C~C-CH3')
+compound2 = Namer('CH~CH')
+compound3 = Namer('CH3-C~C-CH=CH2')  # Invalid conversion for now
+compound4 = Namer('CH4')
+compound5 = Namer('CH2=CH-CH=CH2')
+
+print(f"{compound1.show_structure()}\n{compound1.analyser()}\n")
+print(f"{compound2.show_structure()}\n{compound2.analyser()}\n")
+print(f"{compound3.show_structure()}\n{compound3.analyser()}\n")
+print(f"{compound4.show_structure()}\n{compound4.analyser()}\n")
+print(f"{compound5.show_structure()}\n{compound5.analyser()}\n")
