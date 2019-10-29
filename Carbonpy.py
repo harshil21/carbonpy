@@ -10,12 +10,11 @@
 class Namer(object):  # IUPAC Names for now only
 
     def __init__(self, structure):
-        self.structure = structure
+        self.processing = self.structure = structure  # Processing is a string only for processing
         self.carbons = 0  # No. of carbon atoms present
         self.hydrogens = 0
         self.bond = ""  # Name of bond
         # self.final = ""  # Name of final compound
-        self.processing = structure
 
     def analyser(self):
         compound_name = ""
@@ -100,25 +99,24 @@ class Namer(object):  # IUPAC Names for now only
         lowest_db = 1  # db- double bond
         lowest_tb = 1  # tb- triple bond
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
+        
+        lowest_db = self.lowest_position('=')
+        lowest_tb = self.lowest_position('~')
+        
+        lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})  # Converts to str and removes ()
+        lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
+
+        db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
+        tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
 
         # TODO: Move all of this outside the if conditions and test.
         if '=' in self.processing and '~' in self.processing:
-            lowest_db = self.lowest_position('=')
-            lowest_tb = self.lowest_position('~')
-            lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})  # Converts to str and removes ()
-            lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
-            db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
-            tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
             return f"{lowest_db}{db_prefix}-en-{lowest_tb}{tb_prefix}-yne"
 
         elif '~' in self.processing:
-            lowest_tb = self.lowest_position('~')
-            lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
             return f"{lowest_tb}-yne"
 
         elif '=' in self.processing:
-            lowest_db = self.lowest_position('=')
-            lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})
             return f"{lowest_db}-{multipl_prefixes[len(lowest_db.replace(',', ''))]}ene"  # Return with di,tri,etc
         else:
             return f"ane"  # Alkane
