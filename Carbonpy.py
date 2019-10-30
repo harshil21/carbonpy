@@ -29,8 +29,6 @@ class Namer(object):  # IUPAC Names for now only
 
         # Processing and deciding name(s) of the compound-
         if '~' in self.structure or '=' in self.structure:  # For alkynes and alkenes
-            # triple_bonds = self.structure.count('~')
-            # double_bonds = self.structure.count('=')
             bond_type = self.atom_stripper()
             for key, value in multipl_prefixes.items():
                 if value in bond_type:
@@ -96,72 +94,70 @@ class Namer(object):  # IUPAC Names for now only
         return count
 
     def atom_stripper(self):
-        lowest_db = 1  # db- double bond
-        lowest_tb = 1  # tb- triple bond
+        lowest_db = lowest_tb = 1  # tb- triple bond
+        db_prefix = tb_prefix = ""
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
-        
+
         lowest_db = self.lowest_position('=')
         lowest_tb = self.lowest_position('~')
-        
+
         lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})  # Converts to str and removes ()
         lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
 
-        db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
-        tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
+        if len(lowest_db) >= 3:
+            db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
+        else:
+            lowest_db = lowest_db.replace(',', '')
 
-        # TODO: Move all of this outside the if conditions and test.
+        if len(lowest_tb) >= 3:
+            tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
+        else:
+            lowest_tb = lowest_tb.replace(',', '')
+
         if '=' in self.processing and '~' in self.processing:
+            order = self.lowest_position('=', '~', priority=True)
             return f"{lowest_db}{db_prefix}-en-{lowest_tb}{tb_prefix}-yne"
 
         elif '~' in self.processing:
-            return f"{lowest_tb}-yne"
+            return f"{lowest_tb}-{tb_prefix}yne"
 
         elif '=' in self.processing:
-            return f"{lowest_db}-{multipl_prefixes[len(lowest_db.replace(',', ''))]}ene"  # Return with di,tri,etc
+            return f"{lowest_db}-{db_prefix}ene"  # Return with di,tri,etc
         else:
             return f"ane"  # Alkane
 
-    def lowest_position(self, element):
+    def lowest_position(self, *bonds, priority=False):
         """First point of difference rule used"""
         lowest_front = ()
         lowest_back = ()
 
+        if priority:
+            pass
         # Adds all occurrences from front
         for index, string in enumerate(self.processing):
-            if string == element:
-                lowest_front += (int(index)+1,)
+            if string == bonds[0]:
+                lowest_front += (int(index) + 1,)
 
         # Adds all occurrences from back
         for index, string in enumerate(''.join(reversed(self.processing))):
-            if string == element:
-                lowest_back += (int(index)+1,)
+            if string == bonds[0]:
+                lowest_back += (int(index) + 1,)
 
-        assert(len(lowest_front) == len(lowest_back))
+        assert (len(lowest_front) == len(lowest_back))
         for index, value in enumerate(lowest_front):
-            if value < lowest_back[index]:  # First point of difference
+            # First point of difference-
+            if value < lowest_back[index]:
                 return lowest_front
             elif lowest_back[index] < value:
                 return lowest_back
-            
+
         if len(lowest_front) == 0:
             return None
         else:
-            print(lowest_back)
             return lowest_back  # Can also return front(if compound is symmetrical)
 
-        # This method used to get only first index and can't be used if many bonds are present
-        # index = self.processing.index(element)
-        # rev_index = ''.join(reversed(self.processing))
-        #
-        # front_search = index + 1  # Searches for element from the front
-        # back_search = rev_index.index(element) + 1  # Searches for element from the back
-        #
-        # if back_search < front_search:
-        #     lowest = back_search
-        # else:
-        #     lowest = front_search
-        #
-        # return lowest
+    def priority_order(self):
+        pass
 
     def show_structure(self):  # If user wants to see structure
         symbol = '\u2261'  # The triple bond symbol ≡
@@ -178,17 +174,18 @@ prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "h
 
 precedence = {"=": 1, "~": 1}
 
-multipl_prefixes = {1: "", 2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
-
+multipl_prefixes = {2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
 
 compound1 = Namer('CH3-C~C-CH3')
 compound2 = Namer('CH~CH')
 compound3 = Namer('CH3-C~C-CH=CH2')  # Invalid conversion for now
 compound4 = Namer('CH4')
 compound5 = Namer('CH2=CH-CH=CH2')
+compound6 = Namer('CH2=CH2')
 
 print(f"{compound1.show_structure()}\n{compound1.analyser()}\n")
 print(f"{compound2.show_structure()}\n{compound2.analyser()}\n")
 print(f"{compound3.show_structure()}\n{compound3.analyser()}\n")
 print(f"{compound4.show_structure()}\n{compound4.analyser()}\n")
 print(f"{compound5.show_structure()}\n{compound5.analyser()}\n")
+print(f"{compound6.show_structure()}\n{compound6.analyser()}\n")
