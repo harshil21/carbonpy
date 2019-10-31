@@ -7,6 +7,8 @@
 
 
 class Namer(object):  # IUPAC Names for now only
+    symbol = '\u2261'  # The triple bond symbol ≡
+    subscripts = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")  # Subscripts for molecular and structural formula
 
     def __init__(self, structure):
         self.processing = self.structure = structure  # Processing is a string only for processing
@@ -15,13 +17,13 @@ class Namer(object):  # IUPAC Names for now only
         self.bond = ""  # Name of bond
         # self.final = ""  # Name of final compound
 
-    def analyser(self):
-        compound_name = ""
-        many_bonds = ""
-
         # Counts number of hydrogens and carbons in compound-
         self.carbons = self.atom_counter('C')
         self.hydrogens = self.atom_counter('H')
+
+    def analyser(self):
+        compound_name = ""
+        many_bonds = ""
 
         # Checks valencies of atoms in compound-
         self.valency_checker()
@@ -65,13 +67,12 @@ class Namer(object):  # IUPAC Names for now only
                     if self.structure[-1] == 'H':  # If last carbon has atom
                         valency += 1  # Add that
 
-                finally:
-                    if valency != 4 and index != 0:  # If valency isn't 4 yet
-                        previous_bond = self.structure[index - 1]
-                        valency += values[previous_bond]  # Add previous bond value
+                if valency != 4 and index != 0:  # If valency isn't 4 yet
+                    previous_bond = self.structure[index - 1]
+                    valency += values[previous_bond]  # Add previous bond value
 
-                    if valency != 4:  # If it still isn't four!!!
-                        raise ValencyError("Check valencies of your compound!")
+                if valency != 4:  # If it still isn't four!!!
+                    raise ValencyError("Check valencies of your compound!")
 
     def atom_counter(self, element):
         if element == "C":
@@ -81,7 +82,7 @@ class Namer(object):  # IUPAC Names for now only
             count = 0
             hydros = {"H": 1, "H2": 1, "H3": 2, "H4": 3}  # Each value is less than 1 of parent since 'H' is in it too.
             for hydro, value in hydros.items():
-                count += self.structure.count(hydro) * value  # Multiplied by its value
+                count += self.structure.count(hydro) * value  # Multiplied by its value to get actual value of H
             return count
 
     def atom_stripper(self):
@@ -122,7 +123,7 @@ class Namer(object):  # IUPAC Names for now only
 
     def lowest_position(self):
         """First point of difference rule used"""
-        lowest_front = {} 
+        lowest_front = {}
         lowest_back = {}
         # TODO: Maybe number from front and back simultaneously? (Also made me realize this may not work for isomers)
         # Adds all occurrences from front
@@ -157,9 +158,11 @@ class Namer(object):  # IUPAC Names for now only
     def priority_order(self):
         pass
 
-    def show_structure(self):  # If user wants to see structure
-        symbol = '\u2261'  # The triple bond symbol ≡
-        return f"{self.structure.replace('~', symbol)}"
+    def struct_formula(self):  # If user wants to see structural formula
+        return f"{self.structure.replace('~', self.symbol).translate(self.subscripts)}"
+
+    def molecular_formula(self):  # If user wants to see molecular formula
+        return str(f"C{self.carbons if self.carbons > 1 else ''}H{self.hydrogens}").translate(self.subscripts)
 
 
 class ValencyError(Exception):
@@ -182,10 +185,10 @@ compound5 = Namer('CH2=CH-CH=CH2')
 compound6 = Namer('CH2=CH2')
 compound7 = Namer('CH~C-CH=CH2')
 
-print(f"{compound1.show_structure()}\n{compound1.analyser()}\n")
-print(f"{compound2.show_structure()}\n{compound2.analyser()}\n")
-print(f"{compound3.show_structure()}\n{compound3.analyser()}\n")
-print(f"{compound4.show_structure()}\n{compound4.analyser()}\n")
-print(f"{compound5.show_structure()}\n{compound5.analyser()}\n")
-print(f"{compound6.show_structure()}\n{compound6.analyser()}\n")
-print(f"{compound7.show_structure()}\n{compound7.analyser()}\n")
+print(f"{compound1.struct_formula()}\n{compound1.molecular_formula()}\n{compound1.analyser()}\n")
+print(f"{compound2.struct_formula()}\n{compound2.molecular_formula()}\n{compound2.analyser()}\n")
+print(f"{compound3.struct_formula()}\n{compound3.molecular_formula()}\n{compound3.analyser()}\n")
+print(f"{compound4.struct_formula()}\n{compound4.molecular_formula()}\n{compound4.analyser()}\n")
+print(f"{compound5.struct_formula()}\n{compound5.molecular_formula()}\n{compound5.analyser()}\n")
+print(f"{compound6.struct_formula()}\n{compound6.molecular_formula()}\n{compound6.analyser()}\n")
+print(f"{compound7.struct_formula()}\n{compound7.molecular_formula()}\n{compound7.analyser()}\n")
