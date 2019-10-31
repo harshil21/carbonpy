@@ -19,6 +19,12 @@ Double bond:- =
 Triple bond:- ~  
 Branches:- -([compound](more branches...))([another branch from same carbon])- and so on  
 
+You can also get the molecular formula of the compound:
+```
+compound = Namer('CH~C-C~C-CH=C=C=CH2')
+compound.molecular_formula()
+>>> C₈H₄
+```
 Example- 2-Methylpropane would be expressed as:
 ```
 a = Namer('CH3-CH(CH3)-CH3').analyser()
