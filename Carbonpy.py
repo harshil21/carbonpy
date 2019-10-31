@@ -3,7 +3,7 @@
 # - single bond
 # = double bond
 # ~ triple bond
-# TODO: Identify branched chains, and somehow represent the compound in the same way you would draw it.
+# TODO: Identify branched chains, and somehow represent the compound in the same way you would draw it
 
 
 class Namer(object):  # IUPAC Names for now only
@@ -23,7 +23,7 @@ class Namer(object):  # IUPAC Names for now only
         self.carbons = self.atom_counter('C')
         self.hydrogens = self.atom_counter('H')
 
-        # If compound valencies not satisfied-
+        # Checks valencies of atoms in compound-
         self.valency_checker()
 
         # Processing and deciding name(s) of the compound-
@@ -74,26 +74,15 @@ class Namer(object):  # IUPAC Names for now only
                         raise ValencyError("Check valencies of your compound!")
 
     def atom_counter(self, element):
-        count = 0
-        # TODO: Use count() instead of this bs method?!
         if element == "C":
             return self.structure.count('C')
 
-        for index, atom in enumerate(self.structure):
-            try:
-                subscript = self.structure[index + 1]
-
-            except IndexError:  # If last atom is reached
-                if self.structure[-1] == element:  # Checks if element is present in the last position
-                    count += 1
-            else:
-                if atom == element and subscript.isdigit():  # If subscript is present after the specified atom,
-                    count += int(subscript)  # add that number
-
-                elif atom == element:  # If only one atom is present,
-                    count += 1  # add that one atom
-
-        return count
+        elif element == "H":
+            count = 0
+            hydros = {"H": 1, "H2": 1, "H3": 2, "H4": 3}  # Each value is less than 1 of parent since 'H' is in it too.
+            for hydro, value in hydros.items():
+                count += self.structure.count(hydro) * value  # Multiplied by its value
+            return count
 
     def atom_stripper(self):
         lowest_db = lowest_tb = db_suffix = tb_suffix = ""  # db,tb- double, triple bond
@@ -133,8 +122,7 @@ class Namer(object):  # IUPAC Names for now only
 
     def lowest_position(self):
         """First point of difference rule used"""
-        lowest_front = {}
-        lowest_back = {}
+        lowest_front = lowest_back = {}
         # TODO: Maybe number from front and back simultaneously? (Also made me realize this may not work for isomers)
         # Adds all occurrences from front
         for index, string in enumerate(self.processing):
