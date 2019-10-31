@@ -122,7 +122,8 @@ class Namer(object):  # IUPAC Names for now only
 
     def lowest_position(self):
         """First point of difference rule used"""
-        lowest_front = lowest_back = {}
+        lowest_front = {} 
+        lowest_back = {}
         # TODO: Maybe number from front and back simultaneously? (Also made me realize this may not work for isomers)
         # Adds all occurrences from front
         for index, string in enumerate(self.processing):
