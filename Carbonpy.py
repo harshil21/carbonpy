@@ -3,8 +3,7 @@
 # - single bond
 # = double bond
 # ~ triple bond
-# TODO: Should be able to identify multiple bonds in a compound, identify branched chains, and
-#  somehow represent the compound in the same way you would draw it
+# TODO: Identify branched chains, and somehow represent the compound in the same way you would draw it.
 
 
 class Namer(object):  # IUPAC Names for now only
