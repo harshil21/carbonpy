@@ -30,7 +30,7 @@ class Namer(object):  # IUPAC Names for now only
         # Processing and deciding name(s) of the compound-
         if '~' in self.structure or '=' in self.structure:  # For alkynes and alkenes
             bond_type = self.atom_stripper()
-            for key, value in multipl_prefixes.items():
+            for key, value in multipl_suffixes.items():
                 if value in bond_type:
                     many_bonds = "a"  # This is the 'a' in a compound like butadiene
                     break
@@ -77,6 +77,9 @@ class Namer(object):  # IUPAC Names for now only
     def atom_counter(self, element):
         count = 0
         # TODO: Use count() instead of this bs method?!
+        if element == "C":
+            return self.structure.count('C')
+
         for index, atom in enumerate(self.structure):
             try:
                 subscript = self.structure[index + 1]
@@ -94,62 +97,69 @@ class Namer(object):  # IUPAC Names for now only
         return count
 
     def atom_stripper(self):
-        lowest_db = lowest_tb = 1  # tb- triple bond
-        db_prefix = tb_prefix = ""
+        lowest_db = lowest_tb = db_suffix = tb_suffix = ""  # db,tb- double, triple bond
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
 
-        lowest_db = self.lowest_position('=')
-        lowest_tb = self.lowest_position('~')
+        lows_pos = self.lowest_position()
+        for key, value in lows_pos.items():
+            if value == '=':
+                lowest_db += f"{key},"  # Adds position of double bond with ',' for more bonds
+            elif value == '~':
+                lowest_tb += f"{key},"  # Same as above, except this time for triple bond
 
-        lowest_db = str(lowest_db).translate({ord(i): None for i in '() '})  # Converts to str and removes ()
-        lowest_tb = str(lowest_tb).translate({ord(i): None for i in '() '})
+        lowest_tb = lowest_tb.strip(',')  # Removes ','
+        lowest_db = lowest_db.strip(',')
 
+        # If many double/triple bonds present, get their suffix(di, tri, tetra, etc.)
         if len(lowest_db) >= 3:
-            db_prefix = multipl_prefixes[len(lowest_db.replace(',', ''))]
+            db_suffix = f"-{multipl_suffixes[len(lowest_db.replace(',', ''))]}"  # Add that '-' too
         else:
-            lowest_db = lowest_db.replace(',', '')
+            db_suffix += "-"  # else only '-'
 
         if len(lowest_tb) >= 3:
-            tb_prefix = multipl_prefixes[len(lowest_tb.replace(',', ''))]
+            tb_suffix = f"-{multipl_suffixes[len(lowest_tb.replace(',', ''))]}"
         else:
-            lowest_tb = lowest_tb.replace(',', '')
+            tb_suffix += "-"
 
-        if '=' in self.processing and '~' in self.processing:
-            order = self.lowest_position('=', '~', priority=True)
-            return f"{lowest_db}{db_prefix}-en-{lowest_tb}{tb_prefix}-yne"
+        if '=' in self.processing and '~' in self.processing:  # If double and triple bond present
+            return f"{lowest_db}{db_suffix}en-{lowest_tb}{tb_suffix}yne"
 
-        elif '~' in self.processing:
-            return f"{lowest_tb}-{tb_prefix}yne"
+        elif '~' in self.processing:  # Only triple bond present
+            return f"{lowest_tb}{tb_suffix}yne"
 
-        elif '=' in self.processing:
-            return f"{lowest_db}-{db_prefix}ene"  # Return with di,tri,etc
+        elif '=' in self.processing:  # Only double bond present
+            return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
         else:
             return f"ane"  # Alkane
 
-    def lowest_position(self, *bonds, priority=False):
+    def lowest_position(self):
         """First point of difference rule used"""
-        lowest_front = ()
-        lowest_back = ()
-
-        if priority:
-            pass
+        lowest_front = {}
+        lowest_back = {}
+        # TODO: Maybe number from front and back simultaneously? (Also made me realize this may not work for isomers)
         # Adds all occurrences from front
         for index, string in enumerate(self.processing):
-            if string == bonds[0]:
-                lowest_front += (int(index) + 1,)
+            if string in ('=', '~'):
+                lowest_front[index + 1] = string
 
         # Adds all occurrences from back
         for index, string in enumerate(''.join(reversed(self.processing))):
-            if string == bonds[0]:
-                lowest_back += (int(index) + 1,)
+            if string in ('=', '~'):
+                lowest_back[index + 1] = string
 
-        assert (len(lowest_front) == len(lowest_back))
-        for index, value in enumerate(lowest_front):
+        assert (len(lowest_front) == len(lowest_back))  # Make sure they have the length
+        for (index, value), (index2, value2) in zip(lowest_front.items(), lowest_back.items()):
             # First point of difference-
-            if value < lowest_back[index]:
+            if index < index2:
                 return lowest_front
-            elif lowest_back[index] < value:
+            elif index2 < index:
                 return lowest_back
+            elif index == index2:  # Same index, check for precedence (only = and ~ for now)
+                # Double bond has more precedence than triple
+                if value == '=':  # Will change into a dict access for func groups priority
+                    return lowest_front
+                elif value2 == '=':
+                    return lowest_back
 
         if len(lowest_front) == 0:
             return None
@@ -172,16 +182,17 @@ prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "h
             11: "undec", 12: "dodec", 13: "tridec", 14: "tetradec", 15: "pentadec", 16: "hexadec", 17: "heptadec",
             18: "octadec", 19: "nonadec", 20: "icos"}
 
-precedence = {"=": 1, "~": 1}
+# precedence = {"=": 1, "~": 1}
 
-multipl_prefixes = {2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
+multipl_suffixes = {2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
 
 compound1 = Namer('CH3-C~C-CH3')
 compound2 = Namer('CH~CH')
-compound3 = Namer('CH3-C~C-CH=CH2')  # Invalid conversion for now
+compound3 = Namer('CH~C-C~C-CH=C=C=CH2')
 compound4 = Namer('CH4')
 compound5 = Namer('CH2=CH-CH=CH2')
 compound6 = Namer('CH2=CH2')
+compound7 = Namer('CH~C-CH=CH2')
 
 print(f"{compound1.show_structure()}\n{compound1.analyser()}\n")
 print(f"{compound2.show_structure()}\n{compound2.analyser()}\n")
@@ -189,3 +200,4 @@ print(f"{compound3.show_structure()}\n{compound3.analyser()}\n")
 print(f"{compound4.show_structure()}\n{compound4.analyser()}\n")
 print(f"{compound5.show_structure()}\n{compound5.analyser()}\n")
 print(f"{compound6.show_structure()}\n{compound6.analyser()}\n")
+print(f"{compound7.show_structure()}\n{compound7.analyser()}\n")
