@@ -3,7 +3,7 @@
 # - single bond
 # = double bond
 # ~ triple bond
-# TODO: Identify branched chains, and somehow represent the compound in the same way you would draw it
+# TODO: Identify branched chains, functional groups and somehow represent the compound in the same way you would draw it
 
 
 class Namer(object):  # IUPAC Names for now only
@@ -23,23 +23,18 @@ class Namer(object):  # IUPAC Names for now only
 
     def analyser(self):
         compound_name = ""
-        many_bonds = ""
+        many_bonds = ""  # Is empty for saturated compounds
 
         # Checks valencies of atoms in compound-
         self.valency_checker()
-
         # Processing and deciding name(s) of the compound-
-        if '~' in self.structure or '=' in self.structure:  # For alkynes and alkenes
-            bond_type = self.atom_stripper()
-            for key, value in multipl_suffixes.items():
-                if value in bond_type:
-                    many_bonds = "a"  # This is the 'a' in a compound like butadiene
-                    break
-            compound_name += f"{many_bonds}-{bond_type}"  # Suffix and position is decided
+        bond_type = self.suffix_namer()
 
-        else:  # For alkanes
-            self.bond = "ane"
-            compound_name += self.bond
+        if any(suffix in bond_type for suffix in list(multipl_suffixes.values())):
+            many_bonds += "a-"  # This is the 'a' in a compound like butadiene
+        elif not bond_type == "ane":  # If compound has only one unsaturated bond
+            many_bonds += "-"
+        compound_name += f"{many_bonds}{bond_type}"  # Suffix and position is decided
 
         return f"{prefixes[self.carbons].capitalize()}{compound_name}"  # returns final name
 
@@ -85,11 +80,14 @@ class Namer(object):  # IUPAC Names for now only
                 count += self.structure.count(hydro) * value  # Multiplied by its value to get actual value of H
             return count
 
-    def atom_stripper(self):
+    def suffix_namer(self):
         lowest_db = lowest_tb = db_suffix = tb_suffix = ""  # db,tb- double, triple bond
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
 
         lows_pos = self.lowest_position()
+        if not isinstance(lows_pos, dict):  # If compound is saturated
+            return f"ane"  # Alkane
+
         for key, value in lows_pos.items():
             if value == '=':
                 lowest_db += f"{key},"  # Adds position of double bond with ',' for more bonds
@@ -118,8 +116,6 @@ class Namer(object):  # IUPAC Names for now only
 
         elif '=' in self.processing:  # Only double bond present
             return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
-        else:
-            return f"ane"  # Alkane
 
     def lowest_position(self):
         """First point of difference rule used"""
@@ -136,7 +132,7 @@ class Namer(object):  # IUPAC Names for now only
             if string in ('=', '~'):
                 lowest_back[index + 1] = string
 
-        assert (len(lowest_front) == len(lowest_back))  # Make sure they have the length
+        assert (len(lowest_front) == len(lowest_back))  # Make sure they have the same length
         for (index, value), (index2, value2) in zip(lowest_front.items(), lowest_back.items()):
             # First point of difference-
             if index < index2:
@@ -181,7 +177,7 @@ compound1 = Namer('CH3-C~C-CH3')
 compound2 = Namer('CH~CH')
 compound3 = Namer('CH~C-C~C-CH=C=C=CH2')
 compound4 = Namer('CH4')
-compound5 = Namer('CH2=CH-CH=CH2')
+compound5 = Namer('CH2=CH-CH=CH-CH=CH2')
 compound6 = Namer('CH2=CH2')
 compound7 = Namer('CH~C-CH=CH2')
 
