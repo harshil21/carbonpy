@@ -10,7 +10,7 @@ class Namer(object):  # IUPAC Names for now only
     symbol = '\u2261'  # The triple bond symbol ≡
     subscripts = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")  # Subscripts for molecular and structural formula
 
-    def __init__(self, structure):
+    def __init__(self, structure: str) -> None:
         self.processing = self.structure = structure  # Processing is a string only for processing
         self.carbons = 0  # No. of carbon atoms present
         self.hydrogens = 0
@@ -21,7 +21,16 @@ class Namer(object):  # IUPAC Names for now only
         self.carbons = self.atom_counter('C')
         self.hydrogens = self.atom_counter('H')
 
-    def analyser(self):
+    def __str__(self):  # If user wants to see structural formula
+        return f"{self.structure.replace('~', self.symbol).translate(self.subscripts)}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.structure!r})"
+
+    def molecular_formula(self):  # If user wants to see molecular formula
+        return str(f"C{self.carbons if self.carbons > 1 else ''}H{self.hydrogens}").translate(self.subscripts)
+
+    def analyser(self) -> str:
         compound_name = ""
         many_bonds = ""  # Is empty for saturated compounds
 
@@ -80,7 +89,7 @@ class Namer(object):  # IUPAC Names for now only
                 count += self.structure.count(hydro) * value  # Multiplied by its value to get actual value of H
             return count
 
-    def suffix_namer(self):
+    def suffix_namer(self) -> str:
         lowest_db = lowest_tb = db_suffix = tb_suffix = ""  # db,tb- double, triple bond
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
 
@@ -154,12 +163,6 @@ class Namer(object):  # IUPAC Names for now only
     def priority_order(self):
         pass
 
-    def struct_formula(self):  # If user wants to see structural formula
-        return f"{self.structure.replace('~', self.symbol).translate(self.subscripts)}"
-
-    def molecular_formula(self):  # If user wants to see molecular formula
-        return str(f"C{self.carbons if self.carbons > 1 else ''}H{self.hydrogens}").translate(self.subscripts)
-
 
 class ValencyError(Exception):
     pass
@@ -181,10 +184,10 @@ compound5 = Namer('CH2=CH-CH=CH-CH=CH2')
 compound6 = Namer('CH2=CH2')
 compound7 = Namer('CH~C-CH=CH2')
 
-print(f"{compound1.struct_formula()}\n{compound1.molecular_formula()}\n{compound1.analyser()}\n")
-print(f"{compound2.struct_formula()}\n{compound2.molecular_formula()}\n{compound2.analyser()}\n")
-print(f"{compound3.struct_formula()}\n{compound3.molecular_formula()}\n{compound3.analyser()}\n")
-print(f"{compound4.struct_formula()}\n{compound4.molecular_formula()}\n{compound4.analyser()}\n")
-print(f"{compound5.struct_formula()}\n{compound5.molecular_formula()}\n{compound5.analyser()}\n")
-print(f"{compound6.struct_formula()}\n{compound6.molecular_formula()}\n{compound6.analyser()}\n")
-print(f"{compound7.struct_formula()}\n{compound7.molecular_formula()}\n{compound7.analyser()}\n")
+print(f"{compound1}\n{compound1.molecular_formula()}\n{compound1.analyser()}\n")
+print(f"{compound2}\n{compound2.molecular_formula()}\n{compound2.analyser()}\n")
+print(f"{compound3}\n{compound3.molecular_formula()}\n{compound3.analyser()}\n")
+print(f"{compound4}\n{compound4.molecular_formula()}\n{compound4.analyser()}\n")
+print(f"{compound5}\n{compound5.molecular_formula()}\n{compound5.analyser()}\n")
+print(f"{compound6}\n{compound6.molecular_formula()}\n{compound6.analyser()}\n")
+print(f"{compound7}\n{compound7.molecular_formula()}\n{compound7.analyser()}\n")
