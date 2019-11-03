@@ -126,7 +126,7 @@ class Namer(object):  # IUPAC Names for now only
         elif '=' in self.processing:  # Only double bond present
             return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
 
-    def lowest_position(self):
+    def lowest_position(self) -> dict:
         """First point of difference rule used"""
         lowest_front = {}
         lowest_back = {}
