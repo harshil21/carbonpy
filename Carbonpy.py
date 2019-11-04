@@ -6,6 +6,8 @@
 # TODO: Identify branched chains, functional groups and somehow represent the compound in the same way you would draw it
 
 import re
+from typing import Union
+
 
 class Namer(object):  # IUPAC Names for now only
     symbol = '\u2261'  # The triple bond symbol ≡
@@ -48,36 +50,26 @@ class Namer(object):  # IUPAC Names for now only
 
         return f"{prefixes[self.carbons].capitalize()}{compound_name}"  # returns final name
 
-    def valency_checker(self):
-        """Checks if valencies of carbon are satisfied the same way you would do in real life, by counting no. of
-        atoms and bonds before and after the carbon."""
+    def valency_checker(self) -> None:
+        """Checks if valencies of carbon are satisfied and raises error if not satisfied. """
 
-        values = {'H': 1, '-': 1, '=': 2, '~': 3}
-        # use these as examples to understand code below 'CH3-CH=C=CH2', 'CH~CH':
-        for index, atom in enumerate(self.structure):
-            if atom == 'C':
-                valency = 0  # Valency of each carbon before calculating
-                try:
-                    if self.structure[index + 2].isdigit():  # If atoms after carbon
-                        valency += int(self.structure[index + 2])  # Adds those atoms
-                        valency += values[self.structure[index + 3]]  # And the bond (if it isn't terminal carbon)
+        valency = 0
+        hydros_bonds = {'H': 1, "H2": 1, "H3": 2, "H4": 3, '-': 1, '=': 2, '~': 3}
+        splitted = re.split('([-=~])', self.structure)  # Splits the bonds and elements
 
-                    elif self.structure[index + 2] in values.keys():  # If single H / bonds present
-                        valency += values[self.structure[index + 2]]  # Add that bond value
-                        valency += values[self.structure[index + 1]]  # Add that atom
-                    else:
-                        valency += values[self.structure[index + 1]]  # Add either atom or bond value
+        for index, element in enumerate(splitted):  # Adds the bonds to the string of atoms
+            if element == "-" or element == "=" or element == "~":
+                splitted[index - 1] += element
+                splitted[index + 1] += element
+                splitted.pop(index)  # Removes those bonds from the list. Final list example: ['CH3-', 'CH2-', 'CH3-']
 
-                except (IndexError, KeyError):
-                    if self.structure[-1] == 'H':  # If last carbon has atom
-                        valency += 1  # Add that
-
-                if valency != 4 and index != 0:  # If valency isn't 4 yet
-                    previous_bond = self.structure[index - 1]
-                    valency += values[previous_bond]  # Add previous bond value
-
-                if valency != 4:  # If it still isn't four!!!
-                    raise ValencyError("Check valencies of your compound!")
+        for element in splitted:  # Counts the bonds and hydrogens to see if valency is satisfied
+            for hyd_bonds in hydros_bonds.keys():  # Iterating through dict
+                if hyd_bonds in element:
+                    valency += hydros_bonds[hyd_bonds] * element.count(hyd_bonds)
+            if valency != 4:
+                raise ValencyError("Check valencies of your compound!")
+            valency = 0
 
     def atom_counter(self, element):
         if element == "C":
@@ -127,7 +119,7 @@ class Namer(object):  # IUPAC Names for now only
         elif '=' in self.processing:  # Only double bond present
             return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
 
-    def lowest_position(self) -> dict:
+    def lowest_position(self) -> Union[None, dict]:
         """First point of difference rule used"""
         lowest_front = {}
         lowest_back = {}
