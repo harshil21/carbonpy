@@ -18,6 +18,7 @@ Single bond:- -
 Double bond:- =  
 Triple bond:- ~  
 Branches:- -([compound](more branches...))([another branch from same carbon])- and so on  
+(Branches support coming soon)
 
 You can also get the molecular formula of the compound:
 ```
@@ -32,3 +33,5 @@ a = Namer('CH3-CH(CH3)-CH3').analyser()
 ```
 
 Will support naming with functional groups in the future.
+
+P.S: This project is NOT dead.
