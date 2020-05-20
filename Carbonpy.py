@@ -169,18 +169,34 @@ prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "h
 
 multipl_suffixes = {2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
 
-compound1 = Namer('CH3-C~C-CH3')
-compound2 = Namer('CH~CH')
-compound3 = Namer('CH~C-C~C-CH=C=C=CH2')
-compound4 = Namer('CH4')
-compound5 = Namer('CH2=CH-CH=CH-CH=CH2')
-compound6 = Namer('CH2=CH2')
-compound7 = Namer('CH~C-CH=CH2')
+def help():
+    print("Bonds are represented as follows:")
+    print("\t-\t:\tSingle bond")
+    print("\t=\t:\tDouble bond")
+    print("\t~\t:\tTriple bond\n")
+    
+    print("Examples of valid compounds:")
+    print("\tCH~CH")
+    print("\tCH~C-C~C-CH=C=C=CH2")
 
-print(f"{compound1}\n{compound1.molecular_formula()}\n{compound1.analyser()}\n")
-print(f"{compound2}\n{compound2.molecular_formula()}\n{compound2.analyser()}\n")
-print(f"{compound3}\n{compound3.molecular_formula()}\n{compound3.analyser()}\n")
-print(f"{compound4}\n{compound4.molecular_formula()}\n{compound4.analyser()}\n")
-print(f"{compound5}\n{compound5.molecular_formula()}\n{compound5.analyser()}\n")
-print(f"{compound6}\n{compound6.molecular_formula()}\n{compound6.analyser()}\n")
-print(f"{compound7}\n{compound7.molecular_formula()}\n{compound7.analyser()}\n")
+def main():
+    print("Type `/help` to get usage information.")
+    
+    while True:
+        try:
+            comp_struct = input("Condensed structure > ")
+            if comp_struct.lstrip().rstrip() == "/help":
+                help()
+            else:
+                compound = Namer(comp_struct.lstrip().rstrip())
+                print(f"{compound}\n{compound.molecular_formula()}\n{compound.analyser()}\n")
+
+        except EOFError:
+            print("\nExiting...")
+            quit()
+
+        except Exception:
+            print("Invalid input!")
+
+if __name__ == "__main__":
+    main()
