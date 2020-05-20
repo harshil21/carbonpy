@@ -184,11 +184,11 @@ def main():
     
     while True:
         try:
-            comp_struct = input("Condensed structure > ")
-            if comp_struct.lstrip().rstrip() == "/help":
+            compound_struct = input("Condensed structure > ")
+            if compound_struct.strip() == "/help":
                 help()
             else:
-                compound = Namer(comp_struct.lstrip().rstrip())
+                compound = Namer(compound_struct.strip())
                 print(f"{compound}\n{compound.molecular_formula()}\n{compound.analyser()}\n")
 
         except EOFError:
