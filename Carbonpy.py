@@ -10,6 +10,18 @@ from typing import Union
 
 
 class Namer(object):  # IUPAC Names for now only
+
+    """
+    Bonds are represented as follows:
+        -   :   Single bond
+        =   :   Double bond
+        ~   :   Triple bond
+
+    Examples:
+        CH~CH
+        CH~C-C~C-CH=C=C=CH2
+    """
+
     symbol = '\u2261'  # The triple bond symbol ≡
     subscripts = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")  # Subscripts for molecular and structural formula
 
@@ -169,16 +181,6 @@ prefixes = {1: "meth", 2: "eth", 3: "prop", 4: "but", 5: "pent", 6: "hex", 7: "h
 
 multipl_suffixes = {2: "di", 3: "tri", 4: "tetra", 5: "penta", 6: "hexa", 7: "hepta", 8: "octa", 9: "nona"}
 
-def help():
-    print("Bonds are represented as follows:")
-    print("\t-\t:\tSingle bond")
-    print("\t=\t:\tDouble bond")
-    print("\t~\t:\tTriple bond\n")
-    
-    print("Examples of valid compounds:")
-    print("\tCH~CH")
-    print("\tCH~C-C~C-CH=C=C=CH2")
-
 def main():
     print("Type `/help` to get usage information.")
     
@@ -186,10 +188,10 @@ def main():
         try:
             compound_struct = input("Condensed structure > ")
             if compound_struct.strip() == "/help":
-                help()
+                print(Namer.__doc__)
             else:
                 compound = Namer(compound_struct.strip())
-                print(f"{compound}\n{compound.molecular_formula()}\n{compound.analyser()}\n")
+                print(f"\n{compound}\n{compound.molecular_formula()}\n{compound.analyser()}\n")
 
         except EOFError:
             print("\nExiting...")
