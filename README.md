@@ -17,7 +17,7 @@ Due to limitations in expressing a hydrocarbon easily, we have selected this pat
 Single bond:- -  
 Double bond:- =  
 Triple bond:- ~  
-Branches:- -([compound](more branches...))([another branch from same carbon])- and so on  
+Branches:- -([compound] (more branches...))([another branch from same carbon])- and so on  
 (Branches support coming soon)
 
 You can also get the molecular formula of the compound:
@@ -26,12 +26,10 @@ compound = Namer('CH~C-C~C-CH=C=C=CH2')
 compound.molecular_formula()
 >>> C₈H₄
 ```
-Example- 2-Methylpropane would be expressed as:
+Example- 2-Methylpropane would be expressed as (once branches are supported):
 ```
 a = Namer('CH3-CH(CH3)-CH3').analyser()
 >>> 2-Methylpropane
 ```
 
 Will support naming with functional groups in the future.
-
-P.S: This project is NOT dead.

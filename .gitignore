@@ -1,0 +1,6 @@
+*.pyc
+pypirc
+*idea
+build/
+dist/
+*.egg-info/
