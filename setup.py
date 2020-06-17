@@ -26,4 +26,4 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python :: 3',
                  'Topic :: Scientific/Engineering :: Chemistry'],
-    python_requires='>=3.5')
+    python_requires='>=3.6')
