@@ -44,6 +44,7 @@ class Namer(object):  # IUPAC Names for now only
         structure (:obj:`str`): The condensed chemical structure of the compound.
 
     Attributes:
+        structure (:obj:`str`): The condensed chemical structure of the compound.
         carbons (:obj:`int`): The number of carbon atoms present in the compound.
         hydrogens (:obj:`int`): The number of hydrogen atoms present in the compound.
     """
@@ -62,9 +63,11 @@ class Namer(object):  # IUPAC Names for now only
 
         # Counts number of hydrogens and carbons in compound-
         self.carbons = self.atom_counter('C')
-        self.hydrogens = self.atom_counter('H')
 
-        self.bond = ""  # Name of bond
+        if self.carbons > 20:
+            raise ValueError(f"Got {self.carbons} carbon atoms, this version supports only up to 20 carbon atoms!")
+
+        self.hydrogens = self.atom_counter('H')
 
     def __str__(self):  # If user wants to see structural formula
         return f"{self.structure.replace('~', self.symbol).translate(self.subscripts)}"
@@ -116,7 +119,7 @@ class Namer(object):  # IUPAC Names for now only
                 if hyd_bonds in element:
                     valency += hydros_bonds[hyd_bonds] * element.count(hyd_bonds)
             if valency != 4:
-                raise ValencyError("Check valencies of your compound!")
+                raise ValencyError(f"Valency of one of carbon atom is {valency}! Check valencies of your compound!")
             valency = 0
 
     def atom_counter(self, element: str) -> int:
@@ -134,7 +137,7 @@ class Namer(object):  # IUPAC Names for now only
                 count += self.structure.count(hydro) * value  # Multiplied by its value to get actual value of H
             return count
         else:
-            raise ValueError("Only Carbon ('C') and Hydrogen ('H') is supported in this version!")
+            raise ValueError(f"Got {element}. Only Carbon ('C') and Hydrogen ('H') is supported in this version!")
 
     def suffix_namer(self) -> str:
         """Assigns one or more suffix(es) based on number of bonds present in the compound."""
