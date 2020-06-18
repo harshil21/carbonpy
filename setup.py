@@ -18,6 +18,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/harshil21/carbonpy',
+    project_urls={
+        'Issue Tracker': 'https://github.com/harshil21/carbonpy/issues',
+        'Telegram group': 'https://t.me/carbonpy'
+    },
     packages=find_packages(exclude=['tests*']),
     classifiers=['Development Status :: 1 - Planning',
                  'Intended Audience :: Science/Research',
@@ -26,4 +30,4 @@ setup(
                  'Operating System :: OS Independent',
                  'Programming Language :: Python :: 3',
                  'Topic :: Scientific/Engineering :: Chemistry'],
-    python_requires='>=3.5')
+    python_requires='>=3.6')

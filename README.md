@@ -1,16 +1,30 @@
 # Carbonpy
 A module which names straight/branched chain organic compounds, suggests conversions from one type to another, etc.
+## Installation
 
-## Usage-
+- You can install or upgrade carbonpy with:
+``` 
+$ pip install carbonpy --upgrade
+```
+- Building from source:
+```
+$ git clone https://github.com/harshil21/carbonpy --recursive
+$ cd carbonpy
+$ python setup.py install
+```
+## Usage
 
-### Naming compounds-
+### Naming compounds:
 Instantiate the class `Namer()` , which takes a string which contains the hydrocarbon (condensed form) and then call it with a method named `analyser()` to get the IUPAC name of the compound.
 
 Example:
 ```
+from carbonpy import Namer
+
 a = Namer('CH~CH')
 a.analyser()
->>> Ethyne
+
+>>> Eth-1-yne
 ```
 
 Due to limitations in expressing a hydrocarbon easily, we have selected this path  
