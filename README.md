@@ -14,33 +14,47 @@ $ python setup.py install
 ```
 ## Usage
 
+### Syntax for representing bonds:  
+
+Single bond: -  
+Double bond: =  
+Triple bond: ~  
+
+Examples: `CH3-CH3`, `CH2=CH2`, `CH~CH`
+
 ### Naming compounds:
+
 Instantiate the class `Namer()` , which takes a string which contains the hydrocarbon (condensed form) and then call it with a method named `analyser()` to get the IUPAC name of the compound.
 
 Example:
-```
+``` python
 from carbonpy import Namer
 
-a = Namer('CH~CH')
-a.analyser()
+compound = Namer('CH~CH')
+print(compound.analyser())
 
->>> Eth-1-yne
+>>> 'Eth-1-yne'
 ```
 
-Due to limitations in expressing a hydrocarbon easily, we have selected this path  
-Single bond:- -  
-Double bond:- =  
-Triple bond:- ~  
-Branches:- -([compound] (more branches...))([another branch from same carbon])- and so on  
-(Branches support coming soon)
-
-You can also get the molecular formula of the compound:
-```
+You can also get the molecular formula of a compound:
+```python
 compound = Namer('CH~C-C~C-CH=C=C=CH2')
-compound.molecular_formula()
->>> C₈H₄
+print(compound.molecular_formula())
+>>> 'C₈H₄'
 ```
-Example- 2-Methylpropane would be expressed as (once branches are supported):
+
+Or get the number of carbons/hydrogens in the compound by using the attributes:
+```python
+compound = Namer('CH4')
+carbs = compound.carbons
+hydros = compound.hydrogens
+
+print(f"Carbons: {carbs}, Hydrogens: {hydros}")
+
+>>> 'Carbons: 1, Hydrogens: 4'
+```
+
+Once branches are supported, 2-Methylpropane would be expressed as:
 ```
 a = Namer('CH3-CH(CH3)-CH3').analyser()
 >>> 2-Methylpropane
