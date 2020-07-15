@@ -1,5 +1,7 @@
 # Carbonpy
 A module which names straight/branched chain organic compounds, suggests conversions from one type to another, etc.
+
+[![Downloads](https://pepy.tech/badge/carbonpy)](https://pepy.tech/project/carbonpy) [![Downloads](https://pepy.tech/badge/carbonpy/month)](https://pepy.tech/project/carbonpy/month) [![Downloads](https://pepy.tech/badge/carbonpy/week)](https://pepy.tech/project/carbonpy/week) ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/harshil21/carbonpy?color=orange)
 ## Installation
 
 - You can install or upgrade carbonpy with:
