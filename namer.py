@@ -1,6 +1,8 @@
 from typing import Union
+import re
 
 from compound import CompoundObject
+from error import ValencyError
 from constants import multipl_suffixes, prefixes
 
 
@@ -62,7 +64,28 @@ class BaseNamer(CompoundObject):
             return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
 
     def bonds_only(self):
+        print('im here')
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
+
+    def valency_checker(self) -> None:
+        """Checks if valencies of carbon are satisfied and raises error if not satisfied."""
+
+        hydros_bonds = {'H': 1, "H2": 1, "H3": 2, "H4": 3, '-': 1, '=': 2, '~': 3}
+        splitted = re.split('([-=~])', self.structure)  # Splits the bonds and elements
+
+        for index, element in enumerate(splitted):  # Adds the bonds to the string of atoms
+            if element == "-" or element == "=" or element == "~":
+                splitted[index - 1] += element
+                splitted[index + 1] += element
+                splitted.pop(index)  # Removes those bonds from the list. Final list example: ['CH3-', 'CH2--', 'CH3-']
+
+        for element in splitted:  # Counts the bonds and hydrogens to see if valency is satisfied
+            valency = 0
+            for hyd_bonds in hydros_bonds.keys():  # Iterating through dict
+                if hyd_bonds in element:
+                    valency += hydros_bonds[hyd_bonds] * element.count(hyd_bonds)
+            if valency != 4:
+                raise ValencyError("Check valencies of your compound!")
 
     def lowest_position(self) -> Union[None, dict]:
         """First point of difference rule used"""
@@ -105,9 +128,26 @@ class BaseNamer(CompoundObject):
 
 
 class Branched(BaseNamer):
-    def longest(self):
-        super().bonds_only()
-        chain_length = {}
+    # TODO: Adding chains
+    # def longest(self, chains: list):
+    #     chains = [CompoundObject(structure) for structure in chains]
+    #     longest_chain = max(compound.atom_counter('C') for compound in chains)
+    #     print(longest_chain)
+    #     print(self.processing)
+
+    def branch_splitter(self):  # split branches and pass each of them to longest()
+
         print(self.processing)
-        # for index, element in enumerate(self.processing):
-        #     if element =
+        regex = re.compile('\((.*?)\)')
+        chain = re.compile('C[H]*\((.*?)\).+')
+        branches: list = regex.findall(self.processing)
+        chained = chain.search(self.processing)
+        print(chained)
+        if branches:
+            print(f"matched: {branches}")
+            for match in branches:
+                self.processing = re.sub(f'\({match}\)', '', self.processing)
+            branches.append(self.processing)
+            print(self.processing)
+        print(branches)
+        # self.longest(branches)
