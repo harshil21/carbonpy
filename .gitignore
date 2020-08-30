@@ -1,2 +1,14 @@
-*idea
+# Cache-
 *.pyc
+
+# Pycharm editor-
+*idea
+
+# Distrubtion/Packaging-
+build/
+dist/
+*.egg-info/
+pypirc
+
+# Pytest
+.pytest_cache

@@ -9,6 +9,8 @@ from namer import BaseNamer, Branched
 # comp5 = BaseNamer('CH2=CH-CH=CH-CH=CH2')
 # comp6 = BaseNamer('CH2=CH2')
 # comp7 = BaseNamer('CH~C-CH=CH2')
+comp_tmp = Branched('CH4')
+comp_tmp2 = Branched('CH3-CH3')
 comp8 = Branched('CH3-CH(-CH3)-CH3')  # C-C(C)-C
 comp9 = Branched('CH3-C(-CH2-CH2-CH3)(-CH3)-CH3')
 comp10 = Branched('CH3-C(-CH2-CH2-CH3)(-CH2-CH2-CH3)-CH3')

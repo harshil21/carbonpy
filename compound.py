@@ -17,13 +17,10 @@ class CompoundObject:  # IUPAC Names for now only
 
     def __init__(self, structure: str) -> None:
         self.processing = self.structure = structure.upper()  # Processing is a string only for processing
-        self.carbons = 0  # No. of carbon atoms present
-        self.hydrogens = 0
-        self.final = ""  # Name of final compound
+        self._carbons = self.atom_counter('C')
 
-        # Counts number of hydrogens and carbons in compound-
-        self.carbons = self.atom_counter('C')
-        self.hydrogens = self.atom_counter('H')
+        if self._carbons > 20:
+            raise ValueError(f"Got {self._carbons} carbon atoms, this version supports only up to 20 carbon atoms!")
 
         self.comp_dict = {}
 
@@ -37,7 +34,7 @@ class CompoundObject:  # IUPAC Names for now only
         return self.carbons
 
     def __iter__(self):
-        self.loop = self.remove_bonds(self.structure).replace('(', ' (').replace(')', ') ').split()
+        self.loop = self._remove_bonds(self.structure).replace('(', ' (').replace(')', ') ').split()
         self.index = 0
         return self
 
@@ -53,6 +50,37 @@ class CompoundObject:  # IUPAC Names for now only
         else:
             raise StopIteration
 
+    def __eq__(self, other):
+        return self.molar_mass == other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    def __ne__(self, other):
+        return self.molar_mass != other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    def __lt__(self, other):
+        return self.molar_mass < other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    def __le__(self, other):
+        return self.molar_mass <= other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    def __gt__(self, other):
+        return self.molar_mass > other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    def __ge__(self, other):
+        return self.molar_mass >= other.molar_mass if isinstance(other, CompoundObject) else NotImplemented
+
+    @property
+    def molar_mass(self) -> float:
+        molar_masses = {'C': 12.0107, 'H': 1.00784}
+        return molar_masses['C'] * self.carbons + molar_masses['H'] * self.hydrogens
+
+    @property
+    def carbons(self):
+        return self._carbons
+
+    @property
+    def hydrogens(self):
+        return self.atom_counter('H')
+
     def molecular_formula(self) -> str:  # If user wants to see molecular formula
         return str(f"C{self.carbons if self.carbons > 1 else ''}H{self.hydrogens}").translate(self.subscripts)
 
@@ -60,7 +88,7 @@ class CompoundObject:  # IUPAC Names for now only
         return True if re.search('([()])', self.structure) else False
 
     @staticmethod
-    def remove_bonds(string: str) -> str:
+    def _remove_bonds(string: str) -> str:
         return string.translate({ord(i): ' ' for i in '-=~'})
 
     def to_dict(self, start_index: int = 0):
