@@ -1,7 +1,8 @@
-from typing import Union
-import re
+from collections import deque
+from typing import Union, List
 
 from compound import CompoundObject
+from element import Element
 from error import ValencyError
 from constants import multipl_suffixes, prefixes
 
@@ -64,28 +65,31 @@ class BaseNamer(CompoundObject):
             return f"{lowest_db}{db_suffix}ene"  # Return with di,tri,etc
 
     def bonds_only(self):
-        print('im here')
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
 
     def valency_checker(self) -> None:
         """Checks if valencies of carbon are satisfied and raises error if not satisfied."""
 
         hydros_bonds = {'H': 1, "H2": 1, "H3": 2, "H4": 3, '-': 1, '=': 2, '~': 3}
-        splitted = re.split('([-=~])', self.structure)  # Splits the bonds and elements
+        splitted = []
+        carbon_index = 0
 
-        for index, element in enumerate(splitted):  # Adds the bonds to the string of atoms
-            if element == "-" or element == "=" or element == "~":
-                splitted[index - 1] += element
-                splitted[index + 1] += element
-                splitted.pop(index)  # Removes those bonds from the list. Final list example: ['CH3-', 'CH2--', 'CH3-']
+        for element in self.graph:  # Final list example: ['CH3-', 'CH2--', 'CH3-']
+            compound = ''
+            for attr in ('comp', 'front_bond', 'back_bond', 'top_bond', 'bottom_bond'):
+                value = getattr(element, attr)
+                if value != '':
+                    compound += value
+            splitted.append(compound)
 
         for element in splitted:  # Counts the bonds and hydrogens to see if valency is satisfied
             valency = 0
             for hyd_bonds in hydros_bonds.keys():  # Iterating through dict
                 if hyd_bonds in element:
                     valency += hydros_bonds[hyd_bonds] * element.count(hyd_bonds)
+            carbon_index = self.structure.find('C', carbon_index) + 1
             if valency != 4:
-                raise ValencyError("Check valencies of your compound!")
+                raise ValencyError(f"Check valencies of your compound!\n{self.structure}\n{' ' * (carbon_index - 1)}^")
 
     def lowest_position(self) -> Union[None, dict]:
         """First point of difference rule used"""
@@ -93,7 +97,7 @@ class BaseNamer(CompoundObject):
         lowest_back = {}
         # TODO: Maybe number from front and back simultaneously? (Also made me realize this may not work for isomers)
         self.bonds_only()
-        print(self.processing)
+        # print(self.processing)
         # Adds all occurrences from front
         for index, string in enumerate(self.processing):
             if string in ('=', '~'):
@@ -128,26 +132,64 @@ class BaseNamer(CompoundObject):
 
 
 class Branched(BaseNamer):
-    # TODO: Adding chains
-    # def longest(self, chains: list):
-    #     chains = [CompoundObject(structure) for structure in chains]
-    #     longest_chain = max(compound.atom_counter('C') for compound in chains)
-    #     print(longest_chain)
+    def traverse_node(self, terminal_node: Element):
+        # Using DFS approach-
+        stack, visited = deque([terminal_node.value]), deque([terminal_node.value])
+        path = terminal_node.value
+
+        while stack:
+            # noinspection PyTypeChecker
+            next_nodes = self.graph[stack[-1]]
+            if len(next_nodes) == 1 and path.count('C') > 1:  # When terminal node is reached
+                yield path.split('-')
+
+            for node in next_nodes:
+                if node not in visited:
+                    path += f"-{node}"
+                    visited.append(node)
+                    stack.append(node)
+                    break
+            else:
+                stack.pop()
+                path = "-".join(stack)
+
+    def determine_longest(self):
+        possible_paths: List[List[str]] = []
+        longest_paths: List[List[str]] = []
+        length: int = 1
+
+        def calculate_longest(path_list):
+            nonlocal length, longest_paths
+            if len(path_list) > length:
+                length = len(path_list)
+                longest_paths = [path_list]
+            elif len(path_list) == length:
+                longest_paths.append(path_list)
+
+        for terminal_node, value in self.graph.items():
+            if len(value) == 1:
+                for path in self.traverse_node(terminal_node=terminal_node):
+                    possible_paths.append(path)
+
+        list(map(calculate_longest, possible_paths))
+        # print(possible_paths)
+        # print(f"Number of possible paths: {len(possible_paths)}")
+        # print(longest_paths)
+        return longest_paths
+
+    # def branch_splitter(self):  # split branches and pass each of them to longest()
+    #
     #     print(self.processing)
-
-    def branch_splitter(self):  # split branches and pass each of them to longest()
-
-        print(self.processing)
-        regex = re.compile('\((.*?)\)')
-        chain = re.compile('C[H]*\((.*?)\).+')
-        branches: list = regex.findall(self.processing)
-        chained = chain.search(self.processing)
-        print(chained)
-        if branches:
-            print(f"matched: {branches}")
-            for match in branches:
-                self.processing = re.sub(f'\({match}\)', '', self.processing)
-            branches.append(self.processing)
-            print(self.processing)
-        print(branches)
-        # self.longest(branches)
+    #     regex = re.compile('\((.*?)\)')
+    #     chain = re.compile('C[H]*\((.*?)\).+')
+    #     branches: list = regex.findall(self.processing)
+    #     chained = chain.search(self.processing)
+    #     print(chained)
+    #     if branches:
+    #         print(f"matched: {branches}")
+    #         for match in branches:
+    #             self.processing = re.sub(f'\({match}\)', '', self.processing)
+    #         branches.append(self.processing)
+    #         print(self.processing)
+    #     print(branches)
+    # self.longest(branches)
