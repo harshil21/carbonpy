@@ -6,12 +6,12 @@
 # TODO: Identify functional groups and somehow represent the compound in the same way you would draw it
 # TODO: fix imports by adding '.' before merging
 
-import re
 from collections import deque
 from typing import Dict, Deque
 
 from constants import symbol
 from element import Element
+from error import ValencyError
 
 
 class CompoundObject:  # IUPAC Names for now only
@@ -27,7 +27,7 @@ class CompoundObject:  # IUPAC Names for now only
         self._hydrogens = self.atom_counter('H')
 
         self._carbon_comps = self.processing.translate({ord(i): ' ' for i in '-=~()'}).split()
-        self._bonds_only = list(self.processing.translate({ord(i): None for i in 'CH23()'}))
+        self._bonds_only = list(self.processing.translate({ord(i): None for i in 'CH234()'}))
         # assert len(self._carbon_comps) - 1 == len(self._bonds_only)
 
         self._graph: Dict[Element, Deque[str]] = self.make_graph()
@@ -85,9 +85,6 @@ class CompoundObject:  # IUPAC Names for now only
     def molecular_formula(self) -> str:  # If user wants to see molecular formula
         return str(f"C{self.carbons if self.carbons > 1 else ''}H{self.hydrogens}").translate(self.subscripts)
 
-    def branch_checker(self) -> bool:
-        return True if re.search('([()])', self.structure) else False
-
     @staticmethod
     def _remove_bonds(string: str) -> str:
         return string.translate({ord(i): ' ' for i in '-=~'})
@@ -101,6 +98,17 @@ class CompoundObject:  # IUPAC Names for now only
         obj[this_element].append(prev_element)
         return obj
 
+    def valency_checker(self) -> bool:
+        """Checks if valencies of carbon are satisfied and raises error if not satisfied."""
+        carbon_index = 0
+        val = {'-': 1, '=': 2, '~': 3, '': 0}
+        for e in self.graph:
+            valency = val[e.back_bond] + val[e.top_bond] + val[e.bottom_bond] + val[e.front_bond] + e.hydrogens()
+            carbon_index = self.structure.find('C', carbon_index) + 1
+            if valency != 4:
+                raise ValencyError(f"Check valencies of your compound!\n{self.structure}\n{' ' * (carbon_index - 1)}^")
+        return True
+
     def atom_counter(self, element):
         if element.upper() == "C":
             return self.structure.count('C')
@@ -111,6 +119,7 @@ class CompoundObject:  # IUPAC Names for now only
             for hydro, value in hydros.items():
                 count += self.structure.count(hydro) * value  # Multiplied by its value to get actual value of H
             return count
+        raise ValueError(f"Got {element}. Only Carbon ('C') and Hydrogen ('H') is supported in this version!")
 
     def to_element(self, graph: dict):
         _graph = {}
@@ -131,21 +140,23 @@ class CompoundObject:  # IUPAC Names for now only
         _graph: Dict[str, Deque[str]] = {}
         to_repl = {'-': ' ', '=': ' ', '~': ' ', 'C(': 'C (', 'H(': 'H (', 'H)': 'H )', 'H2)': 'H2 )', 'H3)': 'H3 )',
                    ')(': ') ('}
+
         splitted = self.structure
-        for k, v in to_repl.items():
-            splitted = splitted.replace(k, v)
-        splitted = splitted.split()
-        # print(f"{splitted=}")
+
         branch_elements = deque([])
         visited = deque(['C1'])
         carbon_indexes = []
         index = 0
+
+        for k, v in to_repl.items():
+            splitted = splitted.replace(k, v)
+        splitted = splitted.split()
+        previous = splitted[0]
+
         for ele in splitted:
             if 'C' in ele:
                 index += 1
             carbon_indexes.append(index)
-
-        previous = splitted[0]
 
         for index, element in zip(carbon_indexes[1:], splitted[1:]):
             if previous != ')' and element == '(':

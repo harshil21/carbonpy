@@ -20,50 +20,13 @@ comp11 = Branched('CH~C-CH(-C(-CH3)(-CH2-CH3)-CH3)-C(-CH=C(-CH2-CH3)-CH3)(-CH3)-
 # comp10 = Branched('CH3-CH(-CH2-CH3)-CH3')  # 2-methylbutane. This shows user can input structure in any order!
 # print(f"func :{comp8.branch_splitter()}")
 # print()
-a = comp8.determine_longest()
+# a = comp8.determine_longest()
 # print()
-b = comp9.determine_longest()
+# b = comp9.determine_longest()
 # print()
-c = comp11.determine_longest()
+# c = comp11.determine_longest()
 # print()
 comp11.valency_checker()
-
-# def test_case():
-#     assert a['C1']['adjacent_carbons'] == ['C2']
-#     assert a['C2']['adjacent_carbons'] == ['C1', 'C3', 'C4']
-#     assert a['C3']['adjacent_carbons'] == ['C2']
-#     assert a['C4']['adjacent_carbons'] == ['C2']
-#
-#     assert b['C1']['adjacent_carbons'] == ['C2']
-#     assert b['C2']['adjacent_carbons'] == ['C1', 'C3', 'C6', 'C7']
-#     assert b['C3']['adjacent_carbons'] == ['C2', 'C4']
-#     assert b['C4']['adjacent_carbons'] == ['C3', 'C5']
-#     assert b['C5']['adjacent_carbons'] == ['C4']
-#     assert b['C6']['adjacent_carbons'] == ['C2']
-#     assert b['C7']['adjacent_carbons'] == ['C2']
-#
-#     assert c['C1']['adjacent_carbons'] == ['C2']
-#     assert c['C2']['adjacent_carbons'] == ['C1', 'C3', 'C6', 'C9']
-#     assert c['C3']['adjacent_carbons'] == ['C2', 'C4']
-#     assert c['C4']['adjacent_carbons'] == ['C3', 'C5']
-#     assert c['C5']['adjacent_carbons'] == ['C4']
-#     assert c['C6']['adjacent_carbons'] == ['C2', 'C7']
-#     assert c['C7']['adjacent_carbons'] == ['C6', 'C8']
-#     assert c['C8']['adjacent_carbons'] == ['C7']
-#     assert c['C9']['adjacent_carbons'] == ['C2']
-#
-#     assert d['C1']['adjacent_carbons'] == ['C2']
-#     assert d['C2']['adjacent_carbons'] == ['C1', 'C3', 'C6', 'C7']
-#     assert d['C3']['adjacent_carbons'] == ['C2', 'C4']
-#     assert d['C4']['adjacent_carbons'] == ['C3', 'C5']
-#     assert d['C5']['adjacent_carbons'] == ['C4']
-#     assert d['C6']['adjacent_carbons'] == ['C2']
-#     assert d['C7']['adjacent_carbons'] == ['C2', 'C8', 'C9']
-#     assert d['C8']['adjacent_carbons'] == ['C7']
-#     assert d['C9']['adjacent_carbons'] == ['C7']
-#
-#
-# test_case()
 
 # comps = [comp1, comp2, comp3, comp4, comp5, comp6, comp7]
 

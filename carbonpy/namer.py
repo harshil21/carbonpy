@@ -3,7 +3,6 @@ from typing import Union, List
 
 from compound import CompoundObject
 from element import Element
-from error import ValencyError
 from constants import multipl_suffixes, prefixes
 
 
@@ -11,9 +10,6 @@ class BaseNamer(CompoundObject):
     def analyser(self) -> str:
         compound_name = ""
         many_bonds = ""  # Is empty for saturated compounds
-
-        if self.branch_checker():
-            pass
 
         # Checks valencies of atoms in compound-
         self.valency_checker()
@@ -66,30 +62,6 @@ class BaseNamer(CompoundObject):
 
     def bonds_only(self):
         self.processing = self.processing.translate({ord(i): None for i in 'CH23'})  # Removes everything except bonds
-
-    def valency_checker(self) -> None:
-        """Checks if valencies of carbon are satisfied and raises error if not satisfied."""
-
-        hydros_bonds = {'H': 1, "H2": 1, "H3": 2, "H4": 3, '-': 1, '=': 2, '~': 3}
-        splitted = []
-        carbon_index = 0
-
-        for element in self.graph:  # Final list example: ['CH3-', 'CH2--', 'CH3-']
-            compound = ''
-            for attr in ('comp', 'front_bond', 'back_bond', 'top_bond', 'bottom_bond'):
-                value = getattr(element, attr)
-                if value != '':
-                    compound += value
-            splitted.append(compound)
-
-        for element in splitted:  # Counts the bonds and hydrogens to see if valency is satisfied
-            valency = 0
-            for hyd_bonds in hydros_bonds.keys():  # Iterating through dict
-                if hyd_bonds in element:
-                    valency += hydros_bonds[hyd_bonds] * element.count(hyd_bonds)
-            carbon_index = self.structure.find('C', carbon_index) + 1
-            if valency != 4:
-                raise ValencyError(f"Check valencies of your compound!\n{self.structure}\n{' ' * (carbon_index - 1)}^")
 
     def lowest_position(self) -> Union[None, dict]:
         """First point of difference rule used"""
