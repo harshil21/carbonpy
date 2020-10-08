@@ -38,7 +38,7 @@ class TestCompoundObject:
 
     def test_excess_carbons(self):
         with pytest.raises(ValueError):
-            CompoundObject(f"CH3{'-CH2' * 19}-CH3")
+            CompoundObject(f"CH3{'-CH2' * 10000}-CH3")
 
     def test_atom_counter(self):
         with pytest.raises(ValueError):

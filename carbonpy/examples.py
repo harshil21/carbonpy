@@ -2,8 +2,8 @@ from namer import Branched, BaseNamer
 
 # Examples-
 
-# comp1 = BaseNamer('CH3-C~C-CH3')
-# comp2 = BaseNamer('CH~CH')
+# comp1 = BaseNamer('CH2=C=C=C=CH2')
+# comp2 = BaseNamer('CH~C-CH3')
 # comp3 = BaseNamer('CH~C-C~C-CH=C=C=CH2')
 # comp4 = BaseNamer('CH4')
 # comp5 = BaseNamer('CH2=CH-CH=CH-CH=CH2')

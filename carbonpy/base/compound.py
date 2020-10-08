@@ -10,7 +10,7 @@ from collections import deque
 from typing import Dict, Deque
 
 from constants import symbol
-from element import Element
+from base.element import Element
 from error import ValencyError
 
 
@@ -21,8 +21,8 @@ class CompoundObject:  # IUPAC Names for now only
         self.processing = self.structure = structure.upper()  # Processing is a string only for processing
         self._carbons = self.atom_counter('C')
 
-        if self._carbons > 20:
-            raise ValueError(f"Got {self._carbons} carbon atoms, this version supports only up to 20 carbon atoms!")
+        if self._carbons > 10000:
+            raise ValueError(f"Got {self._carbons} carbon atoms, this version supports only up to 10,000 carbon atoms!")
 
         self._hydrogens = self.atom_counter('H')
 

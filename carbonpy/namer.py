@@ -1,9 +1,11 @@
 from collections import deque
 from typing import Union, List
 
-from compound import CompoundObject
-from element import Element
-from constants import multipl_suffixes, prefixes
+from base.compound import CompoundObject
+from base.element import Element
+from constants import multipl_suffixes
+from rules.retained import convert
+from rules.prefixes import get_prefix
 
 
 class BaseNamer(CompoundObject):
@@ -17,12 +19,15 @@ class BaseNamer(CompoundObject):
         bond_type = self.suffix_namer()
 
         if any(suffix in bond_type for suffix in list(multipl_suffixes.values())):
-            many_bonds += "a-"  # This is the 'a' in a compound like butadiene
+            many_bonds += "a-"  # This is the 'a' in a compound like butadiene, for euphonic reasons
         elif not bond_type == "ane":  # If compound has only one unsaturated bond
             many_bonds += "-"
-        compound_name += f"{many_bonds}{bond_type}"  # Suffix and position is decided
+        compound_name += f"{get_prefix(count=self.carbons, parent=True)}{many_bonds}{bond_type}"
 
-        return f"{prefixes[self.carbons].capitalize()}{compound_name}"  # returns final name
+        if compound_name in convert:
+            compound_name = convert[compound_name]
+
+        return compound_name  # returns final name
 
     def suffix_namer(self) -> str:
         lowest_db = lowest_tb = db_suffix = tb_suffix = ""  # db,tb- double, triple bond
