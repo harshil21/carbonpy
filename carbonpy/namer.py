@@ -96,7 +96,7 @@ class Namer(object):  # IUPAC Names for now only
 
         if any(suffix in bond_type for suffix in list(self.multipl_suffixes.values())):
             many_bonds += "a-"  # This is the 'a' in a compound like butadiene
-        elif not bond_type == "ane":  # If compound has only one unsaturated bond
+        elif bond_type != "ane":  # If compound has only one unsaturated bond
             many_bonds += "-"
         compound_name += f"{many_bonds}{bond_type}"  # Suffix and position is decided
 
