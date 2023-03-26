@@ -1,9 +1,9 @@
 class Element(object):  # Node
     __slots__ = ('value', 'comp', 'front_bond', 'back_bond', 'top_bond', 'bottom_bond')
 
-    def __init__(self, value: str, comp: str) -> None:
+    def __init__(self, value: int or str, comp: str) -> None:
         # Required-
-        self.value: str = value
+        self.value: int or str = value
         self.comp: str = comp
 
         # Optional-

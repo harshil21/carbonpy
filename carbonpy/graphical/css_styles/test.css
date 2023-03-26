@@ -1,0 +1,13 @@
+/* General */
+#event_label:hover #test_label{
+    background: none;
+    background-color: red;
+    color: blue;
+    font: 10px "Comic Sans";
+}
+
+
+button:hover {
+    background: none;
+    background-color: red;
+}

@@ -1,0 +1,44 @@
+/* Setting carbon canvas and its children's properties- */
+@define-color grey #C6C6C6;
+@define-color black #000000;
+@define-color dark_grey #A4A4A4;
+@define-color off_white #DDDEE7;
+
+
+#carboncanvas {
+    background-color: @off_white;
+    font-size: 1em;
+    border-radius: 1em;
+}
+
+#carboncanvas button {
+    background: none;
+    background-image: none;
+    color: @black;
+    border-radius: 10em;
+    padding: 0.2em;
+    margin: 0px;
+}
+
+#carboncanvas button:hover{
+    background: none;
+    background-color: @grey;
+    font-size: 1em;
+}
+
+#carboncanvas button:active{
+    background-color: @dark_grey;
+}
+
+#carboncanvas button.bond {
+    border-radius: 10em;
+    padding: 0.2em;
+    margin: 0px;
+}
+
+#carboncanvas .bond:hover {
+    transition-duration: 0s;
+    background: none;
+    border-width: 0px;
+    font-weight: bold;
+}

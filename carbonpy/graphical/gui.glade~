@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <!-- interface-css-provider-path css_styles/styles.css -->
+  <object class="GtkWindow" id="window1">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Carbonpy</property>
+    <property name="default_width">1344</property>
+    <property name="default_height">768</property>
+    <signal name="destroy" handler="on_window1_destroy" swapped="no"/>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkFixed" id="testcanvas">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkButton" id="button">
+            <property name="label" translatable="yes">wow</property>
+            <property name="width_request">64</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">820</property>
+            <property name="y">494</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEventBox" id="event_label">
+            <property name="name">event_label</property>
+            <property name="width_request">100</property>
+            <property name="height_request">80</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_STRUCTURE_MASK</property>
+            <child>
+              <object class="GtkLabel" id="test">
+                <property name="name">test_label</property>
+                <property name="width_request">53</property>
+                <property name="height_request">52</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">test</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="x">713</property>
+            <property name="y">263</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="carboncanvas">
+            <property name="name">carboncanvas</property>
+            <property name="width_request">634</property>
+            <property name="height_request">321</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_STRUCTURE_MASK</property>
+            <property name="shadow_type">in</property>
+            <signal name="enter-notify-event" handler="on_carboncanvas_enter_notify_event" swapped="no"/>
+            <child>
+              <object class="GtkViewport">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="border_width">0</property>
+                <child>
+                  <object class="GtkFixed" id="fixedcanvas">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkButton" id="c1">
+                        <property name="label" translatable="yes">CH4</property>
+                        <property name="name">C1</property>
+                        <property name="width_request">38</property>
+                        <property name="height_request">32</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">True</property>
+                        <property name="relief">none</property>
+                        <signal name="clicked" handler="on_carbon_clicked" swapped="no"/>
+                        <signal name="enter-notify-event" handler="on_enter_notify_event" swapped="no"/>
+                        <signal name="leave-notify-event" handler="on_leave_notify_event" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="x">278</property>
+                        <property name="y">142</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="x">16</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
